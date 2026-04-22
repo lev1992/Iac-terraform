@@ -6,7 +6,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   instances                       = 2
   admin_username                  = var.admin_username
   disable_password_authentication = true
-  encryption_at_host_enabled      = true
 
   source_image_reference {
     publisher = "Canonical"
