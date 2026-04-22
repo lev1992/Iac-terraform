@@ -3,7 +3,7 @@ resource "azurerm_subnet" "bastion" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
-  address_prefixes     = ["10.0.10.0/26"] 
+  address_prefixes     = ["10.0.10.0/26"]
 }
 
 resource "azurerm_network_security_group" "bastion" {
