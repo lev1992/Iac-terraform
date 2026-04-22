@@ -15,6 +15,6 @@ resource "azurerm_network_security_group" "main" {
     destination_address_prefix = "*"
   }
 }
-  
+
 
 

@@ -19,7 +19,7 @@ resource "azurerm_shared_image" "example" {
     offer     = "0001-com-ubuntu-server-jammy"
     sku       = "22_04-lts"
   }
-} 
+}
 
 # 3. Image Version with Target Replication
 resource "azurerm_shared_image_version" "example" {
@@ -27,11 +27,11 @@ resource "azurerm_shared_image_version" "example" {
   gallery_name        = azurerm_shared_image_gallery.example.name
   image_name          = azurerm_shared_image.example.name
   resource_group_name = var.resource_group_name
-  location            = var.location 
+  location            = var.location
 
-  
+
   target_region {
-    name                   = var.location 
+    name                   = var.location
     regional_replica_count = 1
     storage_account_type   = "Standard_LRS"
   }

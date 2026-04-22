@@ -19,7 +19,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
     caching              = "ReadWrite"
   }
 
-  
+
 
   # Authentication 
   admin_ssh_key {
@@ -29,14 +29,14 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
 
   # Network (nic)
   network_interface {
-    name    = "vmss-nic"
-    primary = true
+    name                      = "vmss-nic"
+    primary                   = true
     network_security_group_id = azurerm_network_security_group.main.id
 
     ip_configuration {
-      name      = "internal"
-      primary   = true
-      subnet_id = var.subnet_id
+      name                                   = "internal"
+      primary                                = true
+      subnet_id                              = var.subnet_id
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.main.id]
     }
   }

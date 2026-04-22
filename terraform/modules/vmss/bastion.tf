@@ -1,6 +1,6 @@
 # 1. Dedicated Subnet for Azure Bastion service
 resource "azurerm_subnet" "bastion" {
-  name                 = "AzureBastionSubnet" 
+  name                 = "AzureBastionSubnet"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
   address_prefixes     = ["10.0.10.0/26"] # Minimum /26 range
