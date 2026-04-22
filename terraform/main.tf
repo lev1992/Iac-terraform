@@ -58,11 +58,15 @@ module "my_vmss" {
   admin_username      = var.admin_username
   ssh_public_key      = var.ssh_public_key
   vnet_name           = azurerm_virtual_network.main.name
-  
+
   # References the subnet created in this file
-  subnet_id           = azurerm_subnet.internal.id
+  subnet_id = azurerm_subnet.internal.id
 }
 
+resource "azurerm_subnet_network_security_group_association" "internal" {
+  subnet_id                 = azurerm_subnet.internal.id
+  network_security_group_id = module.my_vmss.network_security_group_id
+}
 
 
 

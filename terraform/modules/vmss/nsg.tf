@@ -4,8 +4,20 @@ resource "azurerm_network_security_group" "main" {
   resource_group_name = var.resource_group_name
 
   security_rule {
-    name                       = "allow-http"
+    name                       = "allow-bastion-management"
     priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_ranges    = ["22", "3389"]
+    source_address_prefix      = "10.0.10.0/26"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "allow-http"
+    priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -15,6 +27,4 @@ resource "azurerm_network_security_group" "main" {
     destination_address_prefix = "*"
   }
 }
-  
-
 
