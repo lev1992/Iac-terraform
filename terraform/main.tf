@@ -1,6 +1,7 @@
 # 1. Provider configuration for Azure
 provider "azurerm" {
   features {}
+  resource_provider_registrations = "none"
 }
 
 # 2. Variables definition
@@ -67,7 +68,6 @@ resource "azurerm_subnet_network_security_group_association" "internal" {
   subnet_id                 = azurerm_subnet.internal.id
   network_security_group_id = module.my_vmss.network_security_group_id
 }
-
 
 
 
