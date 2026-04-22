@@ -27,6 +27,11 @@ variable "admin_username" {
 variable "ssh_public_key" {
   description = "The SSH public key for Linux authentication"
   type        = string
+
+  validation {
+    condition     = trimspace(var.ssh_public_key) != ""
+    error_message = "ssh_public_key must be provided and must not be empty. Set TF_VAR_ssh_public_key locally or the TF_VAR_SSH_PUBLIC_KEY GitHub secret in CI."
+  }
 }
 
 # 3. Resource Group 
@@ -68,6 +73,5 @@ resource "azurerm_subnet_network_security_group_association" "internal" {
   subnet_id                 = azurerm_subnet.internal.id
   network_security_group_id = module.my_vmss.network_security_group_id
 }
-
 
 
