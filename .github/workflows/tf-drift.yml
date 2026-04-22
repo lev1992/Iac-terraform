@@ -23,6 +23,10 @@ jobs:
   terraform-plan:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
+    environment: Dev
+    defaults:
+      run:
+        working-directory: terraform
     outputs:
       tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
 
@@ -46,48 +50,53 @@ jobs:
     - name: Terraform Plan
       id: tf-plan
       run: |
-        export exitcode=0
-        terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
+        set +e
+        terraform plan -detailed-exitcode -no-color -out tfplan
+        exitcode=$?
+        set -e
         
-        echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+        echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
         
-        if [ $exitcode -eq 1 ]; then
+        if [ "$exitcode" -eq 1 ]; then
           echo Terraform Plan Failed!
           exit 1
-        else 
-          exit 0
         fi
+
+        exit 0
         
     # Save plan to artifacts  
     - name: Publish Terraform Plan
       uses: actions/upload-artifact@v4
       with:
         name: tfplan
-        path: tfplan
+        path: terraform/tfplan
         
     # Create string output of Terraform Plan
     - name: Create String Output
       id: tf-plan-string
       run: |
-        TERRAFORM_PLAN=$(terraform show -no-color tfplan)
-        
         delimiter="$(openssl rand -hex 8)"
-        echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
-        echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
-        echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
-        echo "" >> $GITHUB_OUTPUT
-        echo '```terraform' >> $GITHUB_OUTPUT
-        echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
-        echo '```' >> $GITHUB_OUTPUT
-        echo "</details>" >> $GITHUB_OUTPUT
-        echo "${delimiter}" >> $GITHUB_OUTPUT
+        plan_rendered="$(mktemp)"
+        terraform show -no-color tfplan > "$plan_rendered"
+
+        {
+          echo "summary<<${delimiter}"
+          echo "## Terraform Plan Output"
+          echo "<details><summary>Click to expand</summary>"
+          echo ""
+          echo '```terraform'
+          cat "$plan_rendered"
+          echo '```'
+          echo "</details>"
+          echo "${delimiter}"
+        } >> "$GITHUB_OUTPUT"
         
     # Publish Terraform Plan as task summary
     - name: Publish Terraform Plan to Task Summary
       env:
         SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
       run: |
-        echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+        printf '%s\n' "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
 
     # If changes are detected, create a new issue
     - name: Publish Drift Report
