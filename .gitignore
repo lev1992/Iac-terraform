@@ -1,0 +1,43 @@
+.terraform/
+
+# State files (contains secrets)
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Sensitive variable files
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local env files
+.env
+.env.*
+*.env
+.azure-terraform-env
+
+# Local/editor files
+.vscode/
+.history/
+node_modules/
+.DS_Store
+
+# Local Terraform plans and backups
+*.tfplan
+tfplan
+*.plan
+*.bak
+*.backup
+backup/
+terraform_backup/
+terraform_rebuild/
