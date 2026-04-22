@@ -25,6 +25,7 @@ override.tf.json
 .env.*
 *.env
 .azure-terraform-env
+.venv/
 
 # Local/editor files
 .vscode/

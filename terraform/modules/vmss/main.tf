@@ -1,10 +1,12 @@
 resource "azurerm_linux_virtual_machine_scale_set" "main" {
-  name                = "internal-vmss"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  sku                 = "Standard_B2ts_v2"
-  instances           = 2
-  admin_username      = var.admin_username
+  name                            = "internal-vmss"
+  resource_group_name             = var.resource_group_name
+  location                        = var.location
+  sku                             = "Standard_B2ts_v2"
+  instances                       = 2
+  admin_username                  = var.admin_username
+  disable_password_authentication = true
+  encryption_at_host_enabled      = true
 
   source_image_reference {
     publisher = "Canonical"
@@ -154,5 +156,3 @@ resource "azurerm_lb_rule" "main" {
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = azurerm_lb_probe.http.id
 }
-
-

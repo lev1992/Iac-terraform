@@ -63,6 +63,10 @@ module "my_vmss" {
   subnet_id = azurerm_subnet.internal.id
 }
 
+resource "azurerm_subnet_network_security_group_association" "internal" {
+  subnet_id                 = azurerm_subnet.internal.id
+  network_security_group_id = module.my_vmss.network_security_group_id
+}
 
 
 
