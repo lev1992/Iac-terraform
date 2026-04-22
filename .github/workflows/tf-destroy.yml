@@ -22,7 +22,6 @@ env:
 jobs:
   terraform-destroy:
     name: 'Terraform Destroy'
-    if: github.event.inputs.confirm_destroy == 'DESTROY'
     runs-on: ubuntu-latest
     environment: Dev
     defaults:
@@ -32,6 +31,16 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Validate confirmation
+      run: |
+        confirm_value="${{ github.event.inputs.confirm_destroy }}"
+        confirm_value="$(printf '%s' "$confirm_value" | xargs)"
+
+        if [ "$confirm_value" != "DESTROY" ]; then
+          echo "confirm_destroy must be exactly DESTROY"
+          exit 1
+        fi
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
