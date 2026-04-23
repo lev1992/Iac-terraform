@@ -46,20 +46,20 @@ variable "ssh_public_key" {
 
 locals {
   common_tags = {
-    Environment = var.environment
+    Environment = terraform.workspace
   }
 }
 
 # 3. Resource Group 
 resource "azurerm_resource_group" "main" {
-  name     = var.rg_name
+  name     = "${terraform.workspace}-${var.rg_name}"
   location = var.azure_region
   tags     = local.common_tags
 }
 
 # 4. Networking - Virtual Network and Subnet
 resource "azurerm_virtual_network" "main" {
-  name                = "devops-vnet"
+  name                = "${terraform.workspace}-devops-vnet"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
