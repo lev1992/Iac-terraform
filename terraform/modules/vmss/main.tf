@@ -75,7 +75,7 @@ resource "azurerm_monitor_data_collection_rule" "vmss_guest_metrics" {
       name                          = "linux-memory-counters"
       streams                       = ["Microsoft-InsightsMetrics"]
       sampling_frequency_in_seconds = 60
-      counter_specifiers            = ["\\Memory\\PercentUsedMemory"]
+      counter_specifiers            = ["\\Memory\\Available MBytes"]
     }
   }
 
@@ -139,18 +139,18 @@ resource "azurerm_monitor_autoscale_setting" "main" {
       }
     }
 
-    # Scale out rule: Memory > 75%
+    # Scale out rule: Available memory < 25%
     rule {
       metric_trigger {
-        metric_name        = "\\Memory\\PercentUsedMemory"
+        metric_name        = "Available Memory Percentage"
         metric_namespace   = "azure.vm.linux.guestmetrics"
         metric_resource_id = azurerm_linux_virtual_machine_scale_set.main.id
         time_grain         = "PT1M"
-        statistic          = "Average"
+        statistic          = "Min"
         time_window        = "PT5M"
-        time_aggregation   = "Average"
-        operator           = "GreaterThan"
-        threshold          = 75
+        time_aggregation   = "Minimum"
+        operator           = "LessThan"
+        threshold          = 25
       }
       scale_action {
         direction = "Increase"
@@ -180,18 +180,18 @@ resource "azurerm_monitor_autoscale_setting" "main" {
       }
     }
 
-    # Scale in rule: Memory < 40%
+    # Scale in rule: Available memory > 60%
     rule {
       metric_trigger {
-        metric_name        = "\\Memory\\PercentUsedMemory"
+        metric_name        = "Available Memory Percentage"
         metric_namespace   = "azure.vm.linux.guestmetrics"
         metric_resource_id = azurerm_linux_virtual_machine_scale_set.main.id
         time_grain         = "PT1M"
         statistic          = "Average"
         time_window        = "PT5M"
         time_aggregation   = "Average"
-        operator           = "LessThan"
-        threshold          = 40
+        operator           = "GreaterThan"
+        threshold          = 60
       }
       scale_action {
         direction = "Decrease"
