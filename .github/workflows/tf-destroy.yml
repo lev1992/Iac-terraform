@@ -3,6 +3,14 @@ name: 'Terraform Destroy'
 on:
   workflow_dispatch:
     inputs:
+      target_environment:
+        description: 'Environment to destroy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
       confirm_destroy:
         description: 'Type DESTROY to confirm infrastructure deletion'
         required: true
@@ -23,9 +31,9 @@ jobs:
   terraform-destroy:
     name: 'Terraform Destroy'
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ inputs.target_environment }}
     env:
-      TF_WORKSPACE: dev
+      TF_WORKSPACE: ${{ inputs.target_environment }}
     defaults:
       run:
         working-directory: terraform
