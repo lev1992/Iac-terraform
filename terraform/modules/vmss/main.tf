@@ -21,6 +21,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
     caching              = "ReadWrite"
   }
 
+  boot_diagnostics {
+    storage_account_uri = null
+  }
+
 
 
   # Authentication 
