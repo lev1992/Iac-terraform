@@ -52,6 +52,55 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   }
 }
 
+resource "azurerm_virtual_machine_scale_set_extension" "azure_monitor_agent" {
+  name                         = "AzureMonitorLinuxAgent"
+  virtual_machine_scale_set_id = azurerm_linux_virtual_machine_scale_set.main.id
+  publisher                    = "Microsoft.Azure.Monitor"
+  type                         = "AzureMonitorLinuxAgent"
+  type_handler_version         = "1.0"
+  auto_upgrade_minor_version   = true
+  automatic_upgrade_enabled    = true
+}
+
+resource "azurerm_monitor_data_collection_rule" "vmss_guest_metrics" {
+  name                = "vmss-guest-metrics-dcr"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  kind                = "Linux"
+  description         = "Collect Linux guest memory metrics for VMSS autoscaling."
+  tags                = var.tags
+
+  data_sources {
+    performance_counter {
+      name                          = "linux-memory-counters"
+      streams                       = ["Microsoft-InsightsMetrics"]
+      sampling_frequency_in_seconds = 60
+      counter_specifiers            = ["\\Memory\\PercentUsedMemory"]
+    }
+  }
+
+  destinations {
+    azure_monitor_metrics {
+      name = "azure-monitor-metrics"
+    }
+  }
+
+  data_flow {
+    streams      = ["Microsoft-InsightsMetrics"]
+    destinations = ["azure-monitor-metrics"]
+  }
+}
+
+resource "azurerm_monitor_data_collection_rule_association" "vmss_guest_metrics" {
+  name                    = "vmss-guest-metrics-association"
+  target_resource_id      = azurerm_linux_virtual_machine_scale_set.main.id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.vmss_guest_metrics.id
+
+  depends_on = [
+    azurerm_virtual_machine_scale_set_extension.azure_monitor_agent
+  ]
+}
+
 
 # 2. Add Autoscale settings
 resource "azurerm_monitor_autoscale_setting" "main" {
@@ -90,6 +139,27 @@ resource "azurerm_monitor_autoscale_setting" "main" {
       }
     }
 
+    # Scale out rule: Memory > 75%
+    rule {
+      metric_trigger {
+        metric_name        = "\\Memory\\PercentUsedMemory"
+        metric_namespace   = "azure.vm.linux.guestmetrics"
+        metric_resource_id = azurerm_linux_virtual_machine_scale_set.main.id
+        time_grain         = "PT1M"
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "GreaterThan"
+        threshold          = 75
+      }
+      scale_action {
+        direction = "Increase"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT5M"
+      }
+    }
+
     # Scale in rule: CPU < 30%
     rule {
       metric_trigger {
@@ -107,6 +177,27 @@ resource "azurerm_monitor_autoscale_setting" "main" {
         type      = "ChangeCount"
         value     = "1"
         cooldown  = "PT1M"
+      }
+    }
+
+    # Scale in rule: Memory < 40%
+    rule {
+      metric_trigger {
+        metric_name        = "\\Memory\\PercentUsedMemory"
+        metric_namespace   = "azure.vm.linux.guestmetrics"
+        metric_resource_id = azurerm_linux_virtual_machine_scale_set.main.id
+        time_grain         = "PT1M"
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "LessThan"
+        threshold          = 40
+      }
+      scale_action {
+        direction = "Decrease"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT5M"
       }
     }
   }
