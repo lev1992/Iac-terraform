@@ -6,7 +6,7 @@ resource "azurerm_shared_image_gallery" "example" {
   description         = "My operating systems repository"
 }
 
-# 2. definition - "example" for Ubuntu
+# 2. definition for Ubuntu
 resource "azurerm_shared_image" "example" {
   name                = "ubuntu-template"
   gallery_name        = azurerm_shared_image_gallery.example.name

@@ -40,6 +40,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
       primary                                = true
       subnet_id                              = var.subnet_id
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.main.id]
+      load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.ssh.id]
     }
   }
 
@@ -139,6 +140,17 @@ resource "azurerm_lb" "main" {
 resource "azurerm_lb_backend_address_pool" "main" {
   loadbalancer_id = azurerm_lb.main.id
   name            = "BackEndAddressPool"
+}
+
+resource "azurerm_lb_nat_pool" "ssh" {
+  name                           = "ssh-nat-pool"
+  resource_group_name            = var.resource_group_name
+  loadbalancer_id                = azurerm_lb.main.id
+  protocol                       = "Tcp"
+  frontend_port_start            = 50022
+  frontend_port_end              = 50031
+  backend_port                   = 22
+  frontend_ip_configuration_name = "PublicIPAddress"
 }
 
 resource "azurerm_lb_probe" "http" {
