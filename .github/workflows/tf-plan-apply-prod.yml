@@ -118,16 +118,7 @@ jobs:
     - name: Terraform Init
       run: terraform init
   
-    - name: Select Terraform Workspace
-      run: |
-        terraform workspace list
-        if terraform workspace list | grep -E "^[* ]+${TF_WORKSPACE}$" >/dev/null; then
-          terraform workspace select "$TF_WORKSPACE"
-        else
-          terraform workspace new "$TF_WORKSPACE"
-        fi
-    
-
+  
     - name: Download Terraform Plan
       uses: actions/download-artifact@v4
       with:
