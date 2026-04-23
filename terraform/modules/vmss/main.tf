@@ -6,6 +6,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   instances                       = 2
   admin_username                  = var.admin_username
   disable_password_authentication = true
+  tags                            = var.tags
 
   source_image_reference {
     publisher = "Canonical"
@@ -57,6 +58,7 @@ resource "azurerm_monitor_autoscale_setting" "main" {
   resource_group_name = var.resource_group_name
   location            = var.location
   target_resource_id  = azurerm_linux_virtual_machine_scale_set.main.id
+  tags                = var.tags
 
 
   profile {
@@ -116,6 +118,7 @@ resource "azurerm_public_ip" "main" {
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 # Load Balancer
@@ -124,6 +127,7 @@ resource "azurerm_lb" "main" {
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "Standard"
+  tags                = var.tags
 
   frontend_ip_configuration {
     name                 = "PublicIPAddress"

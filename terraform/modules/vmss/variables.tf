@@ -25,6 +25,17 @@ variable "subnet_id" {
 }
 
 variable "vnet_name" {
+  description = "The name of the virtual network where VMSS will be deployed"
   type        = string
-  description = "The name of the existing Virtual Network where Bastion and VMSS will be deployed"
+}
+
+variable "my_home_ip" {
+  type        = string
+  description = "Allowed home public IP CIDR for SSH access"
+}
+
+variable "tags" {
+  description = "Tags to apply to Azure resources"
+  type        = map(string)
+  default     = {}
 }
