@@ -17,6 +17,16 @@ variable "rg_name" {
   default     = "devops-project-rg"
 }
 
+variable "environment" {
+  description = "Deployment environment tag value"
+  type        = string
+  default     = "Dev"
+}
+
+variable "my_home_ip" {
+  description = "Allowed home public IP CIDR for SSH access"
+  type        = string
+}
 
 variable "admin_username" {
   description = "The admin username for the virtual machines"
@@ -34,10 +44,17 @@ variable "ssh_public_key" {
   }
 }
 
+locals {
+  common_tags = {
+    Environment = var.environment
+  }
+}
+
 # 3. Resource Group 
 resource "azurerm_resource_group" "main" {
   name     = var.rg_name
   location = var.azure_region
+  tags     = local.common_tags
 }
 
 # 4. Networking - Virtual Network and Subnet
@@ -46,6 +63,7 @@ resource "azurerm_virtual_network" "main" {
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
+  tags                = local.common_tags
 }
 
 resource "azurerm_subnet" "internal" {
@@ -64,6 +82,8 @@ module "my_vmss" {
   admin_username      = var.admin_username
   ssh_public_key      = var.ssh_public_key
   vnet_name           = azurerm_virtual_network.main.name
+  my_home_ip          = var.my_home_ip
+  tags                = local.common_tags
 
   # References the subnet created in this file
   subnet_id = azurerm_subnet.internal.id
@@ -73,5 +93,4 @@ resource "azurerm_subnet_network_security_group_association" "internal" {
   subnet_id                 = azurerm_subnet.internal.id
   network_security_group_id = module.my_vmss.network_security_group_id
 }
-
 

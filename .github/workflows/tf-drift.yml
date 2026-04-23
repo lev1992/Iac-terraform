@@ -18,7 +18,7 @@ env:
   ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
   ARM_USE_OIDC: "true"
   TF_VAR_ssh_public_key: "${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}"
-
+  TF_VAR_my_home_ip: ${{ secrets.MY_HOME_IP }}
 jobs:
   terraform-plan:
     name: 'Terraform Plan'
