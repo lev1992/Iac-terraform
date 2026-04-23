@@ -246,6 +246,8 @@ resource "azurerm_lb_nat_pool" "ssh" {
   frontend_port_end              = 50031
   backend_port                   = 22
   frontend_ip_configuration_name = "PublicIPAddress"
+
+  depends_on = [azurerm_lb_backend_address_pool.main]
 }
 
 resource "azurerm_lb_probe" "http" {
@@ -253,6 +255,8 @@ resource "azurerm_lb_probe" "http" {
   name            = "http-probe"
   protocol        = "Tcp"
   port            = 80
+
+  depends_on = [azurerm_lb_nat_pool.ssh]
 }
 
 # LB Rule 
@@ -265,4 +269,10 @@ resource "azurerm_lb_rule" "main" {
   frontend_ip_configuration_name = "PublicIPAddress"
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = azurerm_lb_probe.http.id
+
+  depends_on = [
+    azurerm_lb_backend_address_pool.main,
+    azurerm_lb_nat_pool.ssh,
+    azurerm_lb_probe.http,
+  ]
 }
