@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     env:
-     TF_WORKSPACE: dev
+      TF_WORKSPACE: dev
     defaults:
       run:
         working-directory: terraform
@@ -51,6 +51,9 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
+
+    - name: Select Terraform Workspace
+      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
 
     - name: Terraform Destroy
       run: terraform destroy -auto-approve -input=false

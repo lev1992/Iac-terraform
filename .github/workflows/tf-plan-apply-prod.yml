@@ -1,0 +1,131 @@
+name: 'Terraform Plan/Apply Prod'
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
+  ARM_USE_OIDC: "true"
+  TF_VAR_ssh_public_key: "${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}"
+  TF_VAR_my_home_ip: ${{ secrets.MY_HOME_IP }}
+
+jobs:
+  terraform-plan:
+    name: 'Terraform Plan Prod'
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      TF_WORKSPACE: prod
+    defaults:
+      run:
+        working-directory: terraform
+    outputs:
+      tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Select Terraform Workspace
+      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
+
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    - name: Terraform Plan
+      id: tf-plan
+      run: |
+        set +e
+        terraform plan -detailed-exitcode -no-color -out tfplan
+        exitcode=$?
+        set -e
+
+        echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
+
+        if [ "$exitcode" -eq 1 ]; then
+          echo Terraform Plan Failed!
+          exit 1
+        fi
+
+        exit 0
+
+    - name: Publish Terraform Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: tfplan-prod
+        path: terraform/tfplan
+
+    - name: Create String Output
+      id: tf-plan-string
+      run: |
+        delimiter="$(openssl rand -hex 8)"
+        plan_rendered="$(mktemp)"
+        terraform show -no-color tfplan > "$plan_rendered"
+
+        {
+          echo "summary<<${delimiter}"
+          echo "## Terraform Plan Output (prod)"
+          echo "<details><summary>Click to expand</summary>"
+          echo ""
+          echo '```terraform'
+          cat "$plan_rendered"
+          echo '```'
+          echo "</details>"
+          echo "${delimiter}"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Publish Terraform Plan to Task Summary
+      env:
+        SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
+      run: |
+        printf '%s\n' "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+
+  terraform-apply:
+    name: 'Terraform Apply Prod'
+    if: fromJSON(needs.terraform-plan.outputs.tfplanExitCode) == 2
+    runs-on: ubuntu-latest
+    environment: prod
+    needs: [terraform-plan]
+    env:
+      TF_WORKSPACE: prod
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Select Terraform Workspace
+      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
+
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v4
+      with:
+        name: tfplan-prod
+        path: terraform
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan

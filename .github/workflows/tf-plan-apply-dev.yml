@@ -2,9 +2,6 @@ name: 'Terraform Plan/Apply'
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-    - main
   pull_request:
     branches:
     - main
@@ -28,6 +25,8 @@ jobs:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      TF_WORKSPACE: dev
     defaults:
       run:
         working-directory: terraform
@@ -48,6 +47,9 @@ jobs:
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
+
+    - name: Select Terraform Workspace
+      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
 
     # Checks that all Terraform configuration files adhere to a canonical format
     # Will fail the build if not
@@ -146,10 +148,12 @@ jobs:
                 
   terraform-apply:
     name: 'Terraform Apply'
-    if: github.ref == 'refs/heads/main' && fromJSON(needs.terraform-plan.outputs.tfplanExitCode) == 2
+    if: false
     runs-on: ubuntu-latest
-    environment: Dev
+    environment: dev
     needs: [terraform-plan]
+    env:
+      TF_WORKSPACE: dev
     defaults:
       run:
         working-directory: terraform
@@ -166,6 +170,9 @@ jobs:
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
+
+    - name: Select Terraform Workspace
+      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
 
     # Download saved plan from artifacts  
     - name: Download Terraform Plan
