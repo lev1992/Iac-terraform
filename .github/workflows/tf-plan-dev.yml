@@ -47,9 +47,17 @@ jobs:
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
-
+    
     - name: Select Terraform Workspace
-      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
+      run: |
+        terraform workspace list
+        if terraform workspace list | grep -E "^[* ]+${TF_WORKSPACE}$" >/dev/null; then
+          terraform workspace select "$TF_WORKSPACE"
+        else
+          terraform workspace new "$TF_WORKSPACE"
+          
+        fi
+
 
     # Checks that all Terraform configuration files adhere to a canonical format
     # Will fail the build if not

@@ -45,7 +45,13 @@ jobs:
       run: terraform init
 
     - name: Select Terraform Workspace
-      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
+      run: |
+        terraform workspace list
+        if terraform workspace list | grep -E "^[* ]+${TF_WORKSPACE}$" >/dev/null; then
+           terraform workspace select "$TF_WORKSPACE"
+        else
+          terraform workspace new "$TF_WORKSPACE"
+        fi
 
     - name: Terraform Format
       run: terraform fmt -check
