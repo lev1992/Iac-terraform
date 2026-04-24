@@ -47,9 +47,7 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Select Terraform Workspace
-      run: terraform workspace select "$TF_WORKSPACE" || terraform workspace new "$TF_WORKSPACE"
-
+    
     # Generates an execution plan for Terraform
     # An exit code of 0 indicated no changes, 1 a terraform failure, 2 there are pending changes.
     - name: Terraform Plan

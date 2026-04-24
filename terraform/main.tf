@@ -39,8 +39,8 @@ variable "ssh_public_key" {
   type        = string
 
   validation {
-    condition     = trimspace(var.ssh_public_key) != ""
-    error_message = "ssh_public_key must be provided and must not be empty. Set TF_VAR_ssh_public_key locally or the TF_VAR_SSH_PUBLIC_KEY GitHub secret in CI."
+    condition     = can(regex("^(ssh-rsa|ssh-ed25519|ecdsa-sha2-[^ ]+) [A-Za-z0-9+/=]+( .*)?$", trimspace(var.ssh_public_key)))
+    error_message = "The public key must be a valid OpenSSH format."
   }
 }
 
