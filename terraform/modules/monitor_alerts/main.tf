@@ -53,11 +53,12 @@ resource "azurerm_monitor_metric_alert" "low_memory" {
   tags                = var.tags
 
   criteria {
-    metric_namespace = "azure.vm.linux.guestmetrics"
-    metric_name      = "Available Memory Percentage"
-    aggregation      = "Average"
-    operator         = "LessThan"
-    threshold        = var.available_memory_threshold
+    metric_namespace       = "azure.vm.linux.guestmetrics"
+    metric_name            = "Available Memory Percentage"
+    aggregation            = "Average"
+    operator               = "LessThan"
+    threshold              = var.available_memory_threshold
+    skip_metric_validation = true
   }
 
   action {
