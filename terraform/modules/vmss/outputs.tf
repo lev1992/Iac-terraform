@@ -15,5 +15,5 @@ output "public_ip_address" {
 
 output "ssh_nat_port_range" {
   description = "Load balancer public port range for SSH to VMSS instances"
-  value       = "${azurerm_lb_nat_pool.ssh.frontend_port_start}-${azurerm_lb_nat_pool.ssh.frontend_port_end}"
+  value       = "${azurerm_lb_nat_rule.ssh.frontend_port_start}-${azurerm_lb_nat_rule.ssh.frontend_port_end}"
 }

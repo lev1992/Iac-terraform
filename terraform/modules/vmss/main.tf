@@ -44,7 +44,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
       primary                                = true
       subnet_id                              = var.subnet_id
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.main.id]
-      load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.ssh.id]
+      load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_rule.ssh.id]
     }
   }
 
@@ -237,7 +237,7 @@ resource "azurerm_lb_backend_address_pool" "main" {
   name            = "BackEndAddressPool"
 }
 
-resource "azurerm_lb_nat_pool" "ssh" {
+resource "azurerm_lb_nat_rule" "ssh" {
   name                           = "ssh-nat-pool"
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = azurerm_lb.main.id
@@ -245,6 +245,7 @@ resource "azurerm_lb_nat_pool" "ssh" {
   frontend_port_start            = 50022
   frontend_port_end              = 50031
   backend_port                   = 22
+  backend_address_pool_id        = azurerm_lb_backend_address_pool.main.id
   frontend_ip_configuration_name = "PublicIPAddress"
 
   depends_on = [azurerm_lb_backend_address_pool.main]
@@ -256,7 +257,7 @@ resource "azurerm_lb_probe" "http" {
   protocol        = "Tcp"
   port            = 80
 
-  depends_on = [azurerm_lb_nat_pool.ssh]
+  depends_on = [azurerm_lb_nat_rule.ssh]
 }
 
 # LB Rule 
@@ -272,7 +273,7 @@ resource "azurerm_lb_rule" "main" {
 
   depends_on = [
     azurerm_lb_backend_address_pool.main,
-    azurerm_lb_nat_pool.ssh,
+    azurerm_lb_nat_rule.ssh,
     azurerm_lb_probe.http,
   ]
 }
