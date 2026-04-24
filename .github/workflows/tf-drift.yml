@@ -179,7 +179,9 @@ jobs:
               })
             } 
              
-    # Mark the workflow as failed if drift detected 
-    - name: Error on Failure
+    # Mark the workflow as failed if drift is detected.
+    - name: Fail workflow when drift is detected
       if: steps.tf-plan.outputs.exitcode == 2
-      run: exit 1
+      run: |
+        echo "Terraform drift detected."
+        exit 1
