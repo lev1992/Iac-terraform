@@ -238,7 +238,7 @@ resource "azurerm_lb_backend_address_pool" "main" {
 }
 
 resource "azurerm_lb_nat_rule" "ssh" {
-  name                           = "ssh-nat-pool"
+  name                           = "ssh-nat-rule"
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = azurerm_lb.main.id
   protocol                       = "Tcp"
