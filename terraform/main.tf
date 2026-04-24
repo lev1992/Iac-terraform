@@ -40,7 +40,7 @@ variable "ssh_public_key" {
 
   validation {
     condition     = can(regex("^(ssh-rsa|ssh-ed25519|ecdsa-sha2-[^ ]+) [A-Za-z0-9+/=]+( .*)?$", trimspace(var.ssh_public_key)))
-    error_message = "error_message = "The public key must be a valid OpenSSH format (starting with ssh-rsa, ssh-ed25519, or ecdsa-sha2-)."
+    error_message = "The public key must be a valid OpenSSH format."
   }
 }
 
