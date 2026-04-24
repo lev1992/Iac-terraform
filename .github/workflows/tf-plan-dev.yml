@@ -65,13 +65,19 @@ jobs:
         set -e
 
         echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
-        
-        if [ "$exitcode" -eq 1 ]; then
-          echo Terraform Plan Failed!
-          exit 1
-        fi
 
-        exit 0
+        case "$exitcode" in
+          0)
+            echo "Terraform plan completed with no changes."
+            ;;
+          2)
+            echo "Terraform plan completed with pending changes."
+            ;;
+          *)
+            echo "Terraform Plan Failed with exit code $exitcode!"
+            exit "$exitcode"
+            ;;
+        esac
         
     # Save plan to artifacts  
     - name: Publish Terraform Plan
