@@ -44,6 +44,15 @@ variable "ssh_public_key" {
   }
 }
 
+variable "alert_email_receivers" {
+  description = "Email receivers for Azure Monitor alerts"
+  type = list(object({
+    name          = string
+    email_address = string
+  }))
+  default = []
+}
+
 locals {
   common_tags = {
     Environment = terraform.workspace
@@ -94,3 +103,13 @@ resource "azurerm_subnet_network_security_group_association" "internal" {
   network_security_group_id = module.my_vmss.network_security_group_id
 }
 
+module "monitor_alerts" {
+  source               = "./modules/monitor_alerts"
+  resource_group_name  = azurerm_resource_group.main.name
+  target_resource_id   = module.my_vmss.vmss_id
+  target_resource_name = "internal-vmss"
+  email_receivers      = var.alert_email_receivers
+  tags                 = local.common_tags
+
+  depends_on = [module.my_vmss]
+}
