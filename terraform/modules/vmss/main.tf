@@ -6,13 +6,18 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   instances                       = 2
   admin_username                  = var.admin_username
   disable_password_authentication = true
+  source_image_id                 = var.source_image_id
   tags                            = var.tags
 
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
+  dynamic "source_image_reference" {
+    for_each = var.source_image_id == null ? [var.source_image_reference] : []
+
+    content {
+      publisher = source_image_reference.value.publisher
+      offer     = source_image_reference.value.offer
+      sku       = source_image_reference.value.sku
+      version   = source_image_reference.value.version
+    }
   }
 
   # OS Disk 

@@ -8,6 +8,11 @@ output "vmss_id" {
   value       = azurerm_linux_virtual_machine_scale_set.main.id
 }
 
+output "source_image_id" {
+  description = "Image ID used by the Linux VM scale set. Null means the marketplace source_image_reference was used."
+  value       = azurerm_linux_virtual_machine_scale_set.main.source_image_id
+}
+
 output "public_ip_address" {
   description = "Public IP address of the load balancer"
   value       = azurerm_public_ip.main.ip_address

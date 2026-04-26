@@ -8,6 +8,11 @@ output "public_ip_address" {
   value       = module.my_vmss.public_ip_address
 }
 
+output "vmss_source_image_id" {
+  description = "Shared Image Gallery image version ID used by the VMSS. Null means the marketplace image fallback was used."
+  value       = module.my_vmss.source_image_id
+}
+
 output "ssh_nat_port_range" {
   description = "Load balancer public port range for SSH to VMSS instances"
   value       = module.my_vmss.ssh_nat_port_range

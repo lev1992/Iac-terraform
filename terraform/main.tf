@@ -44,6 +44,12 @@ variable "ssh_public_key" {
   }
 }
 
+variable "vmss_source_image_id" {
+  description = "Optional Shared Image Gallery image version ID for the VMSS. Leave null to use the default Ubuntu marketplace image."
+  type        = string
+  default     = null
+}
+
 variable "alert_email_receivers" {
   description = "Email receivers for Azure Monitor alerts"
   type = list(object({
@@ -90,6 +96,7 @@ module "my_vmss" {
   location            = azurerm_resource_group.main.location
   admin_username      = var.admin_username
   ssh_public_key      = var.ssh_public_key
+  source_image_id     = var.vmss_source_image_id
   vnet_name           = azurerm_virtual_network.main.name
   my_home_ip          = var.my_home_ip
   tags                = local.common_tags
