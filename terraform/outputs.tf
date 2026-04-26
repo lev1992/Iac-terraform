@@ -13,6 +13,21 @@ output "vmss_source_image_id" {
   value       = module.my_vmss.source_image_id
 }
 
+output "compute_gallery_id" {
+  description = "ID of the Azure Compute Gallery"
+  value       = module.image.gallery_id
+}
+
+output "shared_image_definition_id" {
+  description = "ID of the shared image definition"
+  value       = module.image.image_definition_id
+}
+
+output "shared_image_version_id" {
+  description = "ID of the shared image version. Null until shared_image_source_managed_image_id is set."
+  value       = module.image.image_version_id
+}
+
 output "ssh_nat_port_range" {
   description = "Load balancer public port range for SSH to VMSS instances"
   value       = module.my_vmss.ssh_nat_port_range

@@ -50,6 +50,12 @@ variable "vmss_source_image_id" {
   default     = null
 }
 
+variable "shared_image_source_managed_image_id" {
+  description = "Optional managed image ID used to create a Shared Image Gallery version."
+  type        = string
+  default     = null
+}
+
 variable "alert_email_receivers" {
   description = "Email receivers for Azure Monitor alerts"
   type = list(object({
@@ -88,6 +94,13 @@ resource "azurerm_subnet" "internal" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
+module "image" {
+  source                  = "./modules/image"
+  resource_group_name     = azurerm_resource_group.main.name
+  location                = azurerm_resource_group.main.location
+  source_managed_image_id = var.shared_image_source_managed_image_id
+  tags                    = local.common_tags
+}
 
 # This connects to modules/vmss/ folder
 module "my_vmss" {
@@ -96,7 +109,7 @@ module "my_vmss" {
   location            = azurerm_resource_group.main.location
   admin_username      = var.admin_username
   ssh_public_key      = var.ssh_public_key
-  source_image_id     = var.vmss_source_image_id
+  source_image_id     = var.vmss_source_image_id != null ? var.vmss_source_image_id : module.image.image_version_id
   vnet_name           = azurerm_virtual_network.main.name
   my_home_ip          = var.my_home_ip
   tags                = local.common_tags

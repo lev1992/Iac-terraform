@@ -1,18 +1,20 @@
 # 1. The gallery 
 resource "azurerm_shared_image_gallery" "example" {
-  name                = "my_compute_gallery"
+  name                = var.gallery_name
   resource_group_name = var.resource_group_name
   location            = var.location
   description         = "My operating systems repository"
+  tags                = var.tags
 }
 
 # 2. definition for Ubuntu
 resource "azurerm_shared_image" "example" {
-  name                = "ubuntu-template"
+  name                = var.image_name
   gallery_name        = azurerm_shared_image_gallery.example.name
   resource_group_name = var.resource_group_name
   location            = var.location
   os_type             = "Linux"
+  tags                = var.tags
 
   identifier {
     publisher = "Canonical"
@@ -23,12 +25,13 @@ resource "azurerm_shared_image" "example" {
 
 # 3. Image Version with Target Replication
 resource "azurerm_shared_image_version" "example" {
-  name                = "1.0.0"
+  count               = var.source_managed_image_id == null ? 0 : 1
+  name                = var.image_version
   gallery_name        = azurerm_shared_image_gallery.example.name
   image_name          = azurerm_shared_image.example.name
   resource_group_name = var.resource_group_name
   location            = var.location
-
+  managed_image_id    = var.source_managed_image_id
 
   target_region {
     name                   = var.location
