@@ -113,3 +113,11 @@ module "monitor_alerts" {
 
   depends_on = [module.my_vmss]
 }
+
+
+module "vmss" {
+  source = "./modules/vmss"
+
+  source_image_id = module.image.image_version_i
+
+  }

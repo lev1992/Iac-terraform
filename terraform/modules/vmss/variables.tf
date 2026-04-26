@@ -39,3 +39,8 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "source_image_id" {
+  type        = string
+  description = "Shared image version ID for VMSS"
+}
