@@ -8,12 +8,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   disable_password_authentication = true
   tags                            = var.tags
 
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
-  }
+# Shared Image / Compute Gallery image
+source_image_id = var.source_image_id
 
   # OS Disk 
   os_disk {
