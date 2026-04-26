@@ -98,7 +98,10 @@ module "image" {
   source                  = "./modules/image"
   resource_group_name     = azurerm_resource_group.main.name
   location                = azurerm_resource_group.main.location
-  source_managed_image_id = var.shared_image_source_managed_image_id
+  gallery_name            = var.gallery_name
+  image_name              = var.image_name
+  image_version           = var.image_version
+  source_managed_image_id = var.shared_image_source_managed_image_id != null ? var.shared_image_source_managed_image_id : var.source_managed_image_id
   tags                    = local.common_tags
 }
 
